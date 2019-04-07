@@ -14,12 +14,15 @@ namespace COMPSAD_CPE
     public partial class Form2 : Form
     {
         private String id_no;
+        private String table_no;
         private Boolean HasExists = false;
         private int number = 1;
         private Form1 form1 = new Form1();
         public Form2(String label)
         {
             id_no = label;
+            table_no = id_no.Substring(0,3);
+            if (table_no.Equals("116") || table_no.Equals("117")) table_no = "115";
             InitializeComponent();
             welcome_lbl.Text = "Welcome, " + id_no + "!";
             form1.connectDB();
@@ -86,7 +89,7 @@ namespace COMPSAD_CPE
         }
         private void updateGrid()
         {
-            SqlDataAdapter dataAdapter = new SqlDataAdapter("SELECT course_name as 'Course', units as 'Units' FROM [curriculumTable_115] WHERE term_no = '" + number + "';", form1.connection);
+            SqlDataAdapter dataAdapter = new SqlDataAdapter("SELECT course_name as 'Course', units as 'Units' FROM [curriculumTable_" + table_no + "] WHERE term_no = '" + number + "';", form1.connection);
             DataTable table = new DataTable();
             dataAdapter.Fill(table);
             dgv.DataSource = table;
@@ -101,7 +104,7 @@ namespace COMPSAD_CPE
         {
             String prereq_c = "";
             String prereq_l = "";
-            SqlCommand command = new SqlCommand("SELECT * FROM [curriculumTable_115] WHERE course_name = '" + course + "'", form1.connection);
+            SqlCommand command = new SqlCommand("SELECT * FROM [curriculumTable_" + table_no + "] WHERE course_name = '" + course + "'", form1.connection);
             SqlCommand command2 = new SqlCommand("SELECT * FROM [auditTable] WHERE course = '" + course + "'", form1.connection);
             SqlDataReader reader2 = command2.ExecuteReader();
             SqlDataReader reader = command.ExecuteReader();

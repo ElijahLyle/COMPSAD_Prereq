@@ -108,7 +108,7 @@ namespace COMPSAD_CPE
         private void OpenForm3()
         {
             this.Hide();
-            Form3 form3 = new Form3(s2);
+            Form3 form3 = new Form3(s2, "NONE");
             form3.Show();
         }
     }

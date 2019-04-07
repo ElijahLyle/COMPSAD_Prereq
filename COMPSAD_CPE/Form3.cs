@@ -14,12 +14,22 @@ namespace COMPSAD_CPE
     public partial class Form3 : Form
     {
         private String admin_name;
+        private String id;
         private String max_terms;
         private String[] drow = new string[40];
         private int index = 0;
         private Form1 form1;
-        public Form3(String label)
+        public Form3(String label, String confirmed)
         {
+            if(!confirmed.Equals("NONE") || confirmed.Substring(0,1).Equals("1"))
+            {
+                setupCBox();
+                String[] split = confirmed.Split(' ');
+                String split0 = split[0];
+                String split1 = split[1];
+                addIDtoBox(split0);
+                referenceID(split1);
+            }
             form1 = new Form1();
             form1.connectDB();
             InitializeComponent();
@@ -34,7 +44,42 @@ namespace COMPSAD_CPE
 
         private void add_btn_Click(object sender, EventArgs e)
         {
-
+            Boolean boo = false;
+            String message = "ID Number:";
+            String caption = "New Curriculum";
+            MessageBoxButtons button = MessageBoxButtons.OK;
+            String id_number = Microsoft.VisualBasic.Interaction.InputBox(message, caption, "");
+            id_number = id_number.ToUpper();
+            id = id_number;
+            if (id_number.Equals("") || id_number.Equals(null) || !id_number.Substring(0, 2).ToUpper().Equals("ID"))
+            {
+                String msg = "Invalid Inputs";
+                String cap = "ID Number Error";
+                MessageBox.Show(msg, cap, button);
+            }
+            else
+            {
+                boo = checkID(id_number);
+                if(boo == false)
+                {
+                    String m = "ID number added";
+                    String c = "Successfully added";
+                    MessageBoxButtons b = MessageBoxButtons.OK;
+                    MessageBox.Show(m, c, b);
+                    newid_lbl.Text = id_number;
+                    newid_lbl.Visible = true;
+                    exist_lbl.Visible = true;
+                    y_cbox.Visible = true;
+                    n_cbox.Visible = true;
+                }
+                else
+                {
+                    String m = "ID number already has a curriculum";
+                    String c = "Existing curriculum error";
+                    MessageBoxButtons b = MessageBoxButtons.OK;
+                    MessageBox.Show(m, c, b);
+                }
+            }
         }
         private void setupCBox()
         {
@@ -45,6 +90,13 @@ namespace COMPSAD_CPE
             cur_view.Items.Add("ID 116");
             cur_view.Items.Add("ID 117");
             cur_view.Items.Add("ID 118");
+            basis_cb.BackColor = Color.Aqua;
+            basis_cb.ForeColor = Color.White;
+            basis_cb.Items.Add("<Select curriculum>");
+            basis_cb.Items.Add("ID 115");
+            basis_cb.Items.Add("ID 116");
+            basis_cb.Items.Add("ID 117");
+            basis_cb.Items.Add("ID 118");
         }
         private void cur_view_SelectedIndexChanged(object sender, EventArgs e)
         {
@@ -163,6 +215,87 @@ namespace COMPSAD_CPE
                 //datarow[ind] = "";
             }
             //t.Rows.Add(datarow);
+        }
+        private Boolean checkID(String id_1)
+        {
+            Boolean send = false;
+            for(int a = 0; a < cur_view.Items.Count; a++)
+            {
+                if(id_1.Equals(cur_view.GetItemText(cur_view.Items[a])))
+                {
+                    send = true;
+                    break;
+                }
+                else
+                {
+                    send = false;
+                }
+            }
+            return send;
+        }
+        private void addIDtoBox(String id_cb)
+        {
+            cur_view.Items.Add("ID "+ id_cb);
+            basis_cb.Items.Add("ID "+ id_cb);
+        }
+        private void ybox_CheckedChanged(object sender, EventArgs e)
+        {
+            if(y_cbox.Checked == true)
+            {
+                basis_cb.Visible = true;
+                basisid_lbl.Visible = true;
+                n_cbox.CheckState = CheckState.Unchecked;
+                proceed_btn.Visible = true;
+            }
+            else if(y_cbox.Checked == false)
+            {
+                basis_cb.Visible = false;
+                basisid_lbl.Visible = false;
+                proceed_btn.Visible = false;
+            }
+        }
+        private void nbox_CheckedChanged(object sender, EventArgs e)
+        {
+            if(n_cbox.Checked == true)
+            {
+                terms_lbl.Visible = true;
+                terms_tb.Visible = true;
+                y_cbox.CheckState = CheckState.Unchecked;
+                proceed_btn.Visible = true;
+            }
+            else if(n_cbox.Checked == false)
+            {
+                terms_lbl.Visible = false;
+                terms_tb.Visible = false;
+                proceed_btn.Visible = false;
+            }
+        }
+        private void proceed_btn_Click(object sender, EventArgs e)
+        {
+            if(y_cbox.CheckState == CheckState.Checked)
+            {
+                OpenForm4();
+            }
+            if(n_cbox.CheckState == CheckState.Checked)
+            {
+                OpenForm5();
+            }
+        }
+        private void OpenForm4()
+        {
+            this.Hide();
+            String b = basis_cb.SelectedItem.ToString();
+            Form4 form4 = new Form4(id, b);
+            form4.Show();
+        }
+        private void OpenForm5()
+        {
+            Form5 form5 = new Form5();
+            form5.Show();
+        }
+        private void referenceID(String s)
+        {
+
         }
     }
 }
