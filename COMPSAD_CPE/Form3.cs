@@ -13,289 +13,315 @@ namespace COMPSAD_CPE
 {
     public partial class Form3 : Form
     {
-        private String admin_name;
-        private String id;
-        private String max_terms;
-        private String[] drow = new string[40];
-        private int index = 0;
+        private String table_no;
+        private String course_name;
+        private String prechanged_value;
+        private String added_ID;
+        private String[] comboID_new = new string[10];
+        private String[] comboIDref_new = new string[10];
+        private int combo_index = 0;
+        private int cell_index;
+        private int number = 1;
         private Form1 form1;
-        public Form3(String label, String confirmed)
+        public Form3(String label)
         {
-            if(!confirmed.Equals("NONE") || confirmed.Substring(0,1).Equals("1"))
-            {
-                setupCBox();
-                String[] split = confirmed.Split(' ');
-                String split0 = split[0];
-                String split1 = split[1];
-                addIDtoBox(split0);
-                referenceID(split1);
-            }
+            InitializeComponent();
             form1 = new Form1();
             form1.connectDB();
-            InitializeComponent();
-            admin_name = "Admin " + label;
-            admin_lbl.Text = admin_name;
+            admin_lbl.Text = "Admin " + label.ToUpper();
+            CBOX();           
+            id_cbox.SelectedIndex = 0;
+            terms_lbl.Text = "Term " + number.ToString();
+            setupBtns();
+        }
+        private void setupBtns()
+        {
+            left_btn.FlatStyle = FlatStyle.Flat;
+            left_btn.FlatAppearance.BorderColor = Color.Gray;
+            left_btn.FlatAppearance.BorderSize = 1;
+            right_btn.FlatStyle = FlatStyle.Flat;
+            right_btn.FlatAppearance.BorderColor = Color.Gray;
+            right_btn.FlatAppearance.BorderSize = 1;
             add_btn.FlatStyle = FlatStyle.Flat;
             add_btn.FlatAppearance.BorderColor = Color.Gray;
-            add_btn.FlatAppearance.BorderSize = 1;
-            setupCBox();
-            cur_view.SelectedIndex = 0;
+            add_btn.FlatAppearance.BorderSize = 0;
         }
-
-        private void add_btn_Click(object sender, EventArgs e)
+        private void Form3_Load(object sender, EventArgs e)
         {
-            Boolean boo = false;
-            String message = "ID Number:";
-            String caption = "New Curriculum";
-            MessageBoxButtons button = MessageBoxButtons.OK;
-            String id_number = Microsoft.VisualBasic.Interaction.InputBox(message, caption, "");
-            id_number = id_number.ToUpper();
-            id = id_number;
-            if (id_number.Equals("") || id_number.Equals(null) || !id_number.Substring(0, 2).ToUpper().Equals("ID"))
+
+        }
+        private void CBOX()
+        {
+            id_cbox.BackColor = Color.Aqua;
+            id_cbox.ForeColor = Color.White;
+            id_cbox.Items.Add("<Select curriculum>");
+            id_cbox.Items.Add("ID 115");
+            id_cbox.Items.Add("ID 116");
+            id_cbox.Items.Add("ID 117");
+            id_cbox.Items.Add("ID 118");
+        }
+        private void id_cbox_SekectedINdexChanged(object sender, EventArgs e)
+        {
+            if(id_cbox.SelectedIndex > 0 && id_cbox.SelectedIndex < 4)
             {
-                String msg = "Invalid Inputs";
-                String cap = "ID Number Error";
-                MessageBox.Show(msg, cap, button);
+                table_no = "115";
+                setupGrids(table_no);
+            }
+            else if(id_cbox.SelectedIndex == 4)
+            {
+                table_no = "118";
+                setupGrids(table_no);
+            }
+            else if(id_cbox.SelectedIndex > 4)
+            {
+                if(yes_cbox.Checked == true)
+                {
+                    referenceID(id_cbox.SelectedItem.ToString());
+                    setupGrids(table_no);
+                }
+                else
+                {
+                    String[] split = added_ID.Split(' ');
+                    table_no = split[1];
+                    setupGrids(table_no);
+                }
+            }
+            editLabel();
+        }
+        private void editLabel()
+        {
+            select_lbl.Text = id_cbox.SelectedItem.ToString();
+        }
+        private void setupGrids(String num)
+        {
+            String load_type = "";
+            String prereq = "";
+            int index = 0;
+            SqlCommand command = new SqlCommand("SELECT * FROM [curriculumTable_" + num + "] WHERE term_no = '" + number + "';", form1.connection);
+            DataTable table = new DataTable();
+            table.Columns.Add("Course");
+            table.Columns.Add("Units");
+            table.Columns.Add("Prerequisites");
+            SqlDataReader reader = command.ExecuteReader();
+            while (reader.Read())
+            {
+                var datarow = table.NewRow();
+                datarow["Course"] = reader["course_name"].ToString();
+                datarow["Units"] = reader["units"].ToString();
+                String[] split = reader["prereq_courses"].ToString().Split('/');
+                String[] split2 = reader["prereq_load"].ToString().Split('/');
+                foreach (String c in split2)
+                {
+                    if (c.Equals("S")) load_type = "Soft";
+                    else if (c.Equals("C")) load_type = "Corequisite";
+                    else if (c.Equals("H")) load_type = "Hard";
+                    prereq = prereq + split[index] + " (" + load_type + "),";
+                    index++;
+                }
+                if (prereq.Equals(" (),"))
+                {
+                    prereq = "";
+                    load_type = "";
+                }
+                datarow["Prerequisites"] = prereq;
+                prereq = "";
+                load_type = "";
+                table.Rows.Add(datarow);
+                index = 0;
+            }
+            dgv.DataSource = table;
+            dgv.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.AllCells);
+        }
+        private void left_btn_Click(object sender, EventArgs e)
+        {
+            if (number > 1)
+            {
+                number--;
             }
             else
             {
-                boo = checkID(id_number);
-                if(boo == false)
+                number = 13;
+            }
+            terms_lbl.Text = "Term " + number.ToString();
+            setupGrids(table_no);
+        }
+        private void right_btn_Click(object sender, EventArgs e)
+        {
+            if (number < 13)
+            {
+                number++;
+            }
+            else
+            {
+                number = 1;
+            }
+            terms_lbl.Text = "Term " + number.ToString();
+            setupGrids(table_no);
+        }
+        private void dgv_CellValueChanged(object sender, DataGridViewCellEventArgs e)
+        {
+            var row = dgv.Rows[e.RowIndex];
+            var changedValue = (String)row.Cells[e.ColumnIndex].Value;
+            course_name = (String)row.Cells[0].Value;
+            cell_index = e.ColumnIndex;
+            UpdateValues(course_name, changedValue);
+        }
+        private void UpdateValues(String c_name, String c_value)
+        {
+            String course_concat = "";
+            String lcourse_concat = "";
+            String loader = "";
+            if(cell_index == 0)
+            {
+                SqlCommand command = new SqlCommand("UPDATE [curriculumTable_" + table_no + "] SET course_name = @course WHERE course_name = '" + prechanged_value + "';", form1.connection);
+                command.Parameters.AddWithValue("@course", c_value);
+                command.ExecuteNonQuery();
+            }
+            else if(cell_index == 1)
+            {
+                SqlCommand command = new SqlCommand("UPDATE [curriculumTable_" + table_no + "] SET units = @units WHERE course_name = '" + c_name + "';", form1.connection);
+                command.Parameters.AddWithValue("@units", c_value);
+                command.ExecuteNonQuery();
+            }
+            else if(cell_index == 2)
+            {
+                String[] split = c_value.Split(',');
+                for(int a = 0; a < split.Length - 1; a++)
                 {
-                    String m = "ID number added";
-                    String c = "Successfully added";
-                    MessageBoxButtons b = MessageBoxButtons.OK;
-                    MessageBox.Show(m, c, b);
-                    newid_lbl.Text = id_number;
-                    newid_lbl.Visible = true;
-                    exist_lbl.Visible = true;
-                    y_cbox.Visible = true;
-                    n_cbox.Visible = true;
+                    String[] split2 = split[a].Split(' ');
+                    course_concat = course_concat + split2[0] + "/";
+                    String move = split2[1];
+                    String identifier = split2[1].Substring(1, move.Length - 2);
+                    if (identifier.Equals("Soft")) loader = "S";
+                    else if (identifier.Equals("Corequisite")) loader = "C";
+                    else if (identifier.Equals("Hard")) loader = "H";
+                    lcourse_concat = lcourse_concat + loader + "/";
                 }
-                else
-                {
-                    String m = "ID number already has a curriculum";
-                    String c = "Existing curriculum error";
-                    MessageBoxButtons b = MessageBoxButtons.OK;
-                    MessageBox.Show(m, c, b);
-                }
+                course_concat = course_concat.Substring(0,course_concat.Length - 1);
+                lcourse_concat = lcourse_concat.Substring(0, lcourse_concat.Length - 1);
+                SqlCommand command = new SqlCommand("UPDATE [curriculumTable_" + table_no + "] SET prereq_courses = @prereq_courses, prereq_load = @prereq_load WHERE course_name = '" + c_name + "';", form1.connection);
+                command.Parameters.AddWithValue("@prereq_courses", course_concat);
+                command.Parameters.AddWithValue("@prereq_load", lcourse_concat);
+                Console.WriteLine(course_concat);
+                Console.WriteLine(lcourse_concat);
+                command.ExecuteNonQuery();
             }
         }
-        private void setupCBox()
+        private void dgv_CellClick(object sender, DataGridViewCellEventArgs e)
         {
-            cur_view.BackColor = Color.Aqua;
-            cur_view.ForeColor = Color.White;
-            cur_view.Items.Add("<Select curriculum>");
-            cur_view.Items.Add("ID 115");
-            cur_view.Items.Add("ID 116");
-            cur_view.Items.Add("ID 117");
-            cur_view.Items.Add("ID 118");
-            basis_cb.BackColor = Color.Aqua;
-            basis_cb.ForeColor = Color.White;
-            basis_cb.Items.Add("<Select curriculum>");
-            basis_cb.Items.Add("ID 115");
-            basis_cb.Items.Add("ID 116");
-            basis_cb.Items.Add("ID 117");
-            basis_cb.Items.Add("ID 118");
-        }
-        private void cur_view_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            if(cur_view.SelectedIndex > 0)
+            if(dgv.Rows[e.RowIndex].Cells[e.ColumnIndex].Value != null)
             {
-                setupGrid();
+                prechanged_value = dgv.Rows[e.RowIndex].Cells[e.ColumnIndex].Value.ToString();
             }
         }
-        private void setupGrid()
+        private void add_btn_Click(object sender, EventArgs e)
         {
-            String table_name = "";
-            String prev_term = "0";
-            String next_term;
-            String returned;
-            DataTable table = new DataTable();
-            if(cur_view.SelectedIndex > 0 && cur_view.SelectedIndex < 4)
+            Boolean HasId = false;
+            String caption = "Adding New Curriculum";
+            String message = "Write ID number of new curriculum (Format: ID 119)";
+            String new_id = Microsoft.VisualBasic.Interaction.InputBox(message, caption, "");
+            new_id = new_id.ToUpper();
+            for(int a = 0; a < id_cbox.Items.Count - 1; a++)
             {
-                table_name = "115";
-            }
-            else if(cur_view.SelectedIndex == 4)
-            {
-                table_name = "118";
-            }
-            else if(cur_view.SelectedIndex != 0 && cur_view.SelectedIndex > 4)
-            {
-                String[] split = cur_view.SelectedText.Split(' ');
-                table_name = split[1];
-            }
-            SqlCommand command = new SqlCommand("SELECT * FROM [curriculumTable_" + table_name + "]", form1.connection);
-            SqlDataReader reader = command.ExecuteReader();
-            while(reader.Read())
-            {
-                next_term = reader["term_no"].ToString();
-                if(!prev_term.Equals(next_term) && (Int32.Parse(next_term) - Int32.Parse(prev_term) == 1) && Int32.Parse(next_term) <14)
+                id_cbox.SelectedIndex = a;
+                if (id_cbox.SelectedItem.ToString().Equals(new_id))
                 {
-                    prev_term = next_term;
-                    table.Columns.Add("Term " + prev_term + " Courses:");
-                    table.Columns.Add("Units[" + prev_term + "]:");
-                    table.Columns.Add(prev_term);
-                    max_terms = prev_term;
-                }
-            }
-            prev_term = "0";
-            next_term = "";
-            SqlCommand cmd = new SqlCommand("SELECT * FROM [curriculumTable_" + table_name + "]", form1.connection);
-            SqlDataReader r = cmd.ExecuteReader();
-            while(r.Read())
-            {
-                next_term = r["term_no"].ToString();
-                if (!prev_term.Equals(next_term) && (Int32.Parse(next_term) - Int32.Parse(prev_term) == 1) && Int32.Parse(next_term) < 14)
-                {
-                    prev_term = next_term;
-                    returned = addData(table_name, prev_term, table);
-                    returnTable(returned, prev_term, table);
-                }
-            }
-            foreach(String c in drow)
-            {
-                try
-                {
-                    int terms = 1;
-                    var datarow = table.NewRow();
-                    String[] per_term = c.Split('!');
-                    foreach (String d in per_term)
-                    {
-                        if (terms <= Int32.Parse(max_terms))
-                        {
-                            String[] per_table = d.Split('#');
-                            if (per_table.Length == 2)
-                            {
-                                datarow["Term " + terms + " Courses:"] = per_table[0];
-                                datarow["Units[" + terms + "]:"] = per_table[1];
-                                datarow[terms] = "";
-                                terms++;
-                            }
-                        }
-                    }
-                    table.Rows.Add(datarow);
-                }
-                catch(NullReferenceException e)
-                {
-
-                }
-            }
-            wterm_dgv.DataSource = table;
-        }
-        private String addData(String n, String p, DataTable t)
-        {
-            String[] table_array = new string[25];
-            String toarr = "";
-            SqlCommand command = new SqlCommand("SELECT * FROM [curriculumTable_" + n + "] WHERE term_no = '" + p + "'", form1.connection);
-            SqlDataReader r = command.ExecuteReader();
-            while (r.Read())
-            {
-                toarr = toarr + r["course_name"].ToString() + "!" + r["units"].ToString() + "!";
-                table_array[index] = toarr;
-            }
-            index++;
-            return table_array[index - 1];
-        }
-        private void returnTable(String r, String p, DataTable t)
-        {
-            int ind = 0;
-            String data = "";
-            String limiter = "!";
-            String[] split = r.Split('!');
-            var datarow = t.NewRow();
-            for (int b = 0; b < split.Length; b = b + 2)
-            {
-                if (b + 1 != split.Length) data = split[b] + "#" + split[b + 1] + limiter;
-                drow[ind] = drow[ind] + data;
-                ind++;
-                //ind = b + 1;
-                //datarow["Term " + ind + " Courses:"] = split[b];
-                //if (b + 1 != split.Length) datarow["Units[" + ind + "]:"] = split[b + 1];
-                //datarow[ind] = "";
-            }
-            //t.Rows.Add(datarow);
-        }
-        private Boolean checkID(String id_1)
-        {
-            Boolean send = false;
-            for(int a = 0; a < cur_view.Items.Count; a++)
-            {
-                if(id_1.Equals(cur_view.GetItemText(cur_view.Items[a])))
-                {
-                    send = true;
+                    HasId = true;
                     break;
                 }
+            }
+            if (new_id.Equals("") || new_id.Equals(null) || HasId == true)
+            {
+                String msg = "ID Number should not be null or ID number already exists";
+                String cap = "ID Number Input Error";
+                MessageBoxButtons b = MessageBoxButtons.OK;
+                MessageBox.Show(msg, cap, b);
+            }
+            else
+            {
+                use_lbl.Visible = true;
+                yes_cbox.Visible = true;
+                no_cbox.Visible = true;
+                added_ID = new_id;
+                addIDtoCB(new_id);
+            }
+        }
+        private void ybox_CheckChanged(object sender, EventArgs e)
+        {
+            Boolean HasCombo = false;
+            if (yes_cbox.Checked == true)
+            {
+                no_cbox.CheckState = CheckState.Unchecked;
+                String message = "Input ID number of curriculum to be based on (Format: ID 115): ";
+                String caption = "Basis ID";
+                MessageBoxButtons buttons = MessageBoxButtons.OKCancel;
+                String basis_id = Microsoft.VisualBasic.Interaction.InputBox(message, caption, "");
+                basis_id = basis_id.ToUpper();
+                for (int a = 0; a < id_cbox.Items.Count - 1; a++)
+                {
+                    id_cbox.SelectedIndex = a;
+                    if (basis_id.Equals(id_cbox.SelectedItem.ToString()))
+                    {
+                        HasCombo = true;
+                        break;
+                    }
+                }
+                if (basis_id.Equals("") || basis_id.Equals(null) || HasCombo == false)
+                {
+                    String msg = "Invalid Inputs or Basis ID Number Without Curriculum";
+                    String cap = "ID Number Input Error";
+                    MessageBoxButtons b = MessageBoxButtons.OK;
+                    MessageBox.Show(msg, cap, b);
+                }
                 else
                 {
-                    send = false;
+                    //Add ID number with basis ID
+                    comboID_new[combo_index] = added_ID;
+                    if (basis_id.Equals("ID 116") || basis_id.Equals("ID 117"))
+                    {
+                        basis_id = "ID 115";
+                    }
+                    comboIDref_new[combo_index] = basis_id;
+                    status_lbl.Visible = true;
+                    status_lbl.Text = added_ID + ": From " + basis_id + " curriculum";
+                    combo_index++;
                 }
             }
-            return send;
         }
-        private void addIDtoBox(String id_cb)
+        private void nbox_CheckChanged(object sender, EventArgs e)
         {
-            cur_view.Items.Add("ID "+ id_cb);
-            basis_cb.Items.Add("ID "+ id_cb);
-        }
-        private void ybox_CheckedChanged(object sender, EventArgs e)
-        {
-            if(y_cbox.Checked == true)
+            if(no_cbox.Checked == true)
             {
-                basis_cb.Visible = true;
-                basisid_lbl.Visible = true;
-                n_cbox.CheckState = CheckState.Unchecked;
-                proceed_btn.Visible = true;
-            }
-            else if(y_cbox.Checked == false)
-            {
-                basis_cb.Visible = false;
-                basisid_lbl.Visible = false;
-                proceed_btn.Visible = false;
+                yes_cbox.CheckState = CheckState.Unchecked;
+                String message = "Input number of terms for new curriculum (Note: Integer values only)";
+                String caption = "Number of Terms";
+                MessageBoxButtons buttons = MessageBoxButtons.OKCancel;
+                String terms = Microsoft.VisualBasic.Interaction.InputBox(message, caption, "");
+                OpenForm5(added_ID, terms);
             }
         }
-        private void nbox_CheckedChanged(object sender, EventArgs e)
+        private void addIDtoCB(String id)
         {
-            if(n_cbox.Checked == true)
-            {
-                terms_lbl.Visible = true;
-                terms_tb.Visible = true;
-                y_cbox.CheckState = CheckState.Unchecked;
-                proceed_btn.Visible = true;
-            }
-            else if(n_cbox.Checked == false)
-            {
-                terms_lbl.Visible = false;
-                terms_tb.Visible = false;
-                proceed_btn.Visible = false;
-            }
+            id_cbox.Items.Add(id);
         }
-        private void proceed_btn_Click(object sender, EventArgs e)
+        private void referenceID(String selectedID)
         {
-            if(y_cbox.CheckState == CheckState.Checked)
+            String toTable = null;
+            for(int a = 0; a < comboID_new.Length;a++)
             {
-                OpenForm4();
+                if(selectedID.Equals(comboID_new[a]))
+                {
+                    String[] split = comboIDref_new[a].Split(' ');
+                    toTable = split[1];
+                    break;
+                }
             }
-            if(n_cbox.CheckState == CheckState.Checked)
-            {
-                OpenForm5();
-            }
+            table_no = toTable;
         }
-        private void OpenForm4()
+        private void OpenForm5(String id, String t)
         {
-            this.Hide();
-            String b = basis_cb.SelectedItem.ToString();
-            Form4 form4 = new Form4(id, b);
-            form4.Show();
-        }
-        private void OpenForm5()
-        {
-            Form5 form5 = new Form5();
+            Form5 form5 = new Form5(id, t);
             form5.Show();
-        }
-        private void referenceID(String s)
-        {
-
         }
     }
 }

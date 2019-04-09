@@ -49,6 +49,9 @@ namespace COMPSAD_CPE
             back_btn.FlatStyle = FlatStyle.Flat;
             back_btn.FlatAppearance.BorderColor = Color.Gray;
             back_btn.FlatAppearance.BorderSize = 0;
+            audit_btn.FlatStyle = FlatStyle.Flat;
+            audit_btn.FlatAppearance.BorderColor = Color.Gray;
+            audit_btn.FlatAppearance.BorderSize = 0;
         }
         private void InitGrid()
         {
@@ -165,18 +168,10 @@ namespace COMPSAD_CPE
                 if (split2[n].Equals("S")) datarow["Load"] = "Soft";
                 else if (split2[n].Equals("C")) datarow["Load"] = "Corequisite";
                 else if (split2[n].Equals("H")) datarow["Load"] = "Hard";
-                if(status.Equals("1"))
-                {
-                    value = "Passed";
-                }
-                else if(status.Equals("0"))
-                {
-                    value = "Currently Taking";
-                }
-                else if(status.Equals("2"))
-                {
-                    value = "Failed";
-                }
+                if (status.Equals("1")) value = "Passed";
+                else if (status.Equals("2")) value = "Currently Taking";
+                else if (status.Equals("0")) value = "Not Yet Taken";
+                else if (status.Equals("3")) value = "Failed";
                 datarow["Course Status"] = value;
                 table.Rows.Add(datarow);
                 n++;
@@ -212,6 +207,15 @@ namespace COMPSAD_CPE
                 search_txt.Text = "Enter course here...";
                 search_txt.ForeColor = Color.Gray;
             }
+        }
+        private void audit_btn_Click(object sender, EventArgs e)
+        {
+            //0 = Not Yet Taken
+            //1 = Passed
+            //2 = Currently Taking
+            //3 = Failed
+            Form4 form4 = new Form4(id_no);
+            form4.Show();
         }
     }
 }

@@ -18,11 +18,14 @@ namespace COMPSAD_CPE
         private String s1;
         private String s2;
         private String[] split_user;
+        private DTBdata data;
         public Form1()
         {
             InitializeComponent();
             EditLogin();
             connectDB();
+            data = new DTBdata();
+            data.UpdateTable();
         }
 
         public void connectDB()
@@ -70,11 +73,8 @@ namespace COMPSAD_CPE
         {
             String text = user_txt.Text;
             split_user = text.Split('.');
-            Console.WriteLine(split_user.Length);
             s1 = split_user[0];
             s2 = split_user[1];
-            Console.WriteLine(s1);
-            Console.WriteLine(s2);
             SqlCommand command = new SqlCommand("SELECT * FROM [user_table]", connection);
             SqlDataReader dataReader = command.ExecuteReader();
             while (dataReader.Read())
@@ -108,7 +108,7 @@ namespace COMPSAD_CPE
         private void OpenForm3()
         {
             this.Hide();
-            Form3 form3 = new Form3(s2, "NONE");
+            Form3 form3 = new Form3(s2);
             form3.Show();
         }
     }

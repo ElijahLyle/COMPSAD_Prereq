@@ -41,6 +41,8 @@
             this.right_btn = new System.Windows.Forms.Button();
             this.left_btn = new System.Windows.Forms.Button();
             this.panel3 = new System.Windows.Forms.Panel();
+            this.name_lbl = new System.Windows.Forms.Label();
+            this.label6 = new System.Windows.Forms.Label();
             this.status_lbl = new System.Windows.Forms.Label();
             this.label5 = new System.Windows.Forms.Label();
             this.dgv2 = new System.Windows.Forms.DataGridView();
@@ -51,8 +53,7 @@
             this.label1 = new System.Windows.Forms.Label();
             this.search_txt = new System.Windows.Forms.TextBox();
             this.label4 = new System.Windows.Forms.Label();
-            this.label6 = new System.Windows.Forms.Label();
-            this.name_lbl = new System.Windows.Forms.Label();
+            this.audit_btn = new System.Windows.Forms.Button();
             this.panel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dgv)).BeginInit();
             this.panel2.SuspendLayout();
@@ -203,6 +204,28 @@
             this.panel3.Size = new System.Drawing.Size(348, 274);
             this.panel3.TabIndex = 4;
             // 
+            // name_lbl
+            // 
+            this.name_lbl.AutoSize = true;
+            this.name_lbl.Font = new System.Drawing.Font("Microsoft Sans Serif", 11F, ((System.Drawing.FontStyle)((System.Drawing.FontStyle.Bold | System.Drawing.FontStyle.Italic))), System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.name_lbl.ForeColor = System.Drawing.Color.LightGray;
+            this.name_lbl.Location = new System.Drawing.Point(80, 35);
+            this.name_lbl.Name = "name_lbl";
+            this.name_lbl.Size = new System.Drawing.Size(76, 18);
+            this.name_lbl.TabIndex = 10;
+            this.name_lbl.Text = "name_txt";
+            // 
+            // label6
+            // 
+            this.label6.AutoSize = true;
+            this.label6.Font = new System.Drawing.Font("Microsoft Sans Serif", 11F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label6.ForeColor = System.Drawing.Color.LightGray;
+            this.label6.Location = new System.Drawing.Point(7, 35);
+            this.label6.Name = "label6";
+            this.label6.Size = new System.Drawing.Size(57, 18);
+            this.label6.TabIndex = 9;
+            this.label6.Text = "Name:";
+            // 
             // status_lbl
             // 
             this.status_lbl.AutoSize = true;
@@ -311,27 +334,18 @@
             this.label4.TabIndex = 6;
             this.label4.Text = "Search Course:";
             // 
-            // label6
+            // audit_btn
             // 
-            this.label6.AutoSize = true;
-            this.label6.Font = new System.Drawing.Font("Microsoft Sans Serif", 11F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label6.ForeColor = System.Drawing.Color.LightGray;
-            this.label6.Location = new System.Drawing.Point(7, 35);
-            this.label6.Name = "label6";
-            this.label6.Size = new System.Drawing.Size(57, 18);
-            this.label6.TabIndex = 9;
-            this.label6.Text = "Name:";
-            // 
-            // name_lbl
-            // 
-            this.name_lbl.AutoSize = true;
-            this.name_lbl.Font = new System.Drawing.Font("Microsoft Sans Serif", 11F, ((System.Drawing.FontStyle)((System.Drawing.FontStyle.Bold | System.Drawing.FontStyle.Italic))), System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.name_lbl.ForeColor = System.Drawing.Color.LightGray;
-            this.name_lbl.Location = new System.Drawing.Point(80, 35);
-            this.name_lbl.Name = "name_lbl";
-            this.name_lbl.Size = new System.Drawing.Size(76, 18);
-            this.name_lbl.TabIndex = 10;
-            this.name_lbl.Text = "name_txt";
+            this.audit_btn.BackgroundImage = ((System.Drawing.Image)(resources.GetObject("audit_btn.BackgroundImage")));
+            this.audit_btn.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.audit_btn.ForeColor = System.Drawing.Color.Transparent;
+            this.audit_btn.Location = new System.Drawing.Point(568, 39);
+            this.audit_btn.Name = "audit_btn";
+            this.audit_btn.Size = new System.Drawing.Size(101, 23);
+            this.audit_btn.TabIndex = 7;
+            this.audit_btn.Text = "Update Audit";
+            this.audit_btn.UseVisualStyleBackColor = true;
+            this.audit_btn.Click += new System.EventHandler(this.audit_btn_Click);
             // 
             // Form2
             // 
@@ -339,6 +353,7 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackgroundImage = ((System.Drawing.Image)(resources.GetObject("$this.BackgroundImage")));
             this.ClientSize = new System.Drawing.Size(681, 406);
+            this.Controls.Add(this.audit_btn);
             this.Controls.Add(this.label4);
             this.Controls.Add(this.search_txt);
             this.Controls.Add(this.panel3);
@@ -384,5 +399,6 @@
         private System.Windows.Forms.Label label5;
         private System.Windows.Forms.Label name_lbl;
         private System.Windows.Forms.Label label6;
+        private System.Windows.Forms.Button audit_btn;
     }
 }

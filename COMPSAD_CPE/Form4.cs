@@ -13,81 +13,104 @@ namespace COMPSAD_CPE
 {
     public partial class Form4 : Form
     {
-        private int number = 1;
         private Form1 form1;
         private String id_number;
-        private String s1;
-        private String s2;
-        public Form4(String id, String basis)
+        private String id_strip;
+        private String chValue;
+        private String chValue_Course;
+        private String hastaken;
+        private int saved_index;
+        public Form4(String label)
         {
+            InitializeComponent();
             form1 = new Form1();
             form1.connectDB();
-            InitializeComponent();
-            id_lbl.Text = id;
-            basis_lbl.Text = basis;
-            String[] split = basis.Split(' ');
-            String[] split2 = id.Split(' ');
-            s1 = split2[1];
-            s2 = split[1];
-            term_lbl.Text = "Term" + number;
-            if (split[1].Equals("116") || split[1].Equals("117")) split[1] = "115";
-            id_number = split[1];
-            setupBtns();
+            id_number = label;
+            id_lbl.Text = "ID Number:" + id_number;
+            id_strip = id_number.Substring(0,3);
             UpdateGrid();
+            setupBtns();
         }
         private void setupBtns()
         {
-            left_btn.FlatStyle = FlatStyle.Flat;
-            left_btn.FlatAppearance.BorderColor = Color.Gray;
-            left_btn.FlatAppearance.BorderSize = 1;
-            right_btn.FlatStyle = FlatStyle.Flat;
-            right_btn.FlatAppearance.BorderColor = Color.Gray;
-            right_btn.FlatAppearance.BorderSize = 1;
+            done_btn.FlatStyle = FlatStyle.Flat;
+            done_btn.FlatAppearance.BorderColor = Color.Gray;
+            done_btn.FlatAppearance.BorderSize = 1;
         }
         private void Form4_Load(object sender, EventArgs e)
         {
 
         }
-        private void leftbtn_Click(object sender, EventArgs e)
-        {
-            if (number > 1)
-            {
-                number--;
-            }
-            else
-            {
-                number = 13;
-            }
-            term_lbl.Text = "Term " + number;
-            UpdateGrid();
-        }
-        private void rightbtn_Click(object sender, EventArgs e)
-        {
-            if (number < 13)
-            {
-                number++;
-            }
-            else
-            {
-                number = 1;
-            }
-            term_lbl.Text = "Term " + number;
-            UpdateGrid();
-        }
         private void UpdateGrid()
         {
-            SqlDataAdapter dataAdapter = new SqlDataAdapter("SELECT course_name as 'Course', units as 'Units', prereq_courses as 'Prerequisites', prereq_load as 'Prerequisite Loads' FROM [curriculumTable_" + id_number + "] WHERE term_no = '" + number + "';", form1.connection);
+            int index = 0;
+            String status = "";
             DataTable table = new DataTable();
-            dataAdapter.Fill(table);
-            cur_dgv.DataSource = table;
-            cur_dgv.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.AllCells);
+            table.Columns.Add("Course");
+            table.Columns.Add("Status");
+            SqlCommand command = new SqlCommand("SELECT * FROM auditTable", form1.connection);
+            SqlDataReader reader = command.ExecuteReader();
+            while(reader.Read())
+            {
+                String course = reader["course"].ToString();
+                hastaken = reader["HasTaken"].ToString();
+                String[] split = reader["student_ID"].ToString().Split('/');
+                String[] split2 = reader["HasTaken"].ToString().Split('/');
+                foreach(String c in split)
+                {
+                    if(c.Equals(id_number))
+                    {
+                        status = split2[index];
+                        saved_index = index;
+                    }
+                    index++;
+                }
+                var datarow = table.NewRow();
+                datarow["Course"] = course;
+                if (status.Equals("0")) datarow["Status"] = "Not Yet Taken";
+                else if (status.Equals("1")) datarow["Status"] = "Passed";
+                else if (status.Equals("2")) datarow["Status"] = "Currently Taking";
+                else if (status.Equals("3")) datarow["Status"] = "Failed";
+                table.Rows.Add(datarow);
+                index = 0;
+            }
+            dgv.DataSource = table;
+            //0 = Not Yet Taken
+            //1 = Passed
+            //2 = Currently Taking
+            //3 = Failed
         }
-
-        private void confirm_btn_Click(object sender, EventArgs e)
+        private void dgv_CellValueChanged(object sender, DataGridViewCellEventArgs e)
         {
-            this.Hide();
-            Form3 form3 = new Form3("", s1 + " " + s2);
-            form3.Show();
+            var row = dgv.Rows[e.RowIndex];
+            var changedValue = (String)row.Cells[e.ColumnIndex].Value;
+            chValue = changedValue;
+            chValue_Course = (String)row.Cells[e.ColumnIndex - 1].Value;
+            UpdateState(chValue, chValue_Course);
+        }
+        private void UpdateState(String stat, String cour)
+        {
+            String toadd = "";
+            String concat = "";
+            if (stat.Equals("Not Yet Taken")) toadd = "0";
+            else if (stat.Equals("Passed")) toadd = "1";
+            else if (stat.Equals("Currently Taking")) toadd = "2";
+            else if (stat.Equals("Failed")) toadd = "3";
+            String[] split = hastaken.Split('/');
+            split[saved_index] = toadd;
+            for(int a = 0; a < split.Length; a++)
+            {
+                if (split.Length == 1) concat = concat + split[a];
+                else
+                    concat = concat + split[a] + "/";
+            }
+            SqlCommand comm = new SqlCommand("UPDATE [auditTable] SET HasTaken = @HasTaken WHERE course = '" + cour + "'", form1.connection);
+            comm.Parameters.AddWithValue("@HasTaken", concat);
+            comm.ExecuteNonQuery();
+        }
+        private void done_btn_Click(object sender, EventArgs e)
+        {
+            this.Close();
         }
     }
 }
